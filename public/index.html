@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AIVA Backend API Docs</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0d14;
+      --surface: #13131f;
+      --card: #17172a;
+      --border: #1f1f35;
+      --accent: #7c6af7;
+      --accent-dim: rgba(124,106,247,0.12);
+      --green: #3ddc84;
+      --green-dim: rgba(61,220,132,0.1);
+      --red: #ff5f57;
+      --red-dim: rgba(255,95,87,0.1);
+      --yellow: #ffbd2e;
+      --yellow-dim: rgba(255,189,46,0.1);
+      --blue: #5ba3f5;
+      --blue-dim: rgba(91,163,245,0.1);
+      --text: #e2e2f0;
+      --muted: #5a5a7a;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    nav {
+      width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 32px 0 32px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    .nav-logo {
+      font-family: var(--sans);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+      display: block;
+    }
+    .nav-logo span { color: var(--text); }
+    .nav-section { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; padding: 12px 20px 4px; }
+    nav a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 20px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      transition: color 0.15s, background 0.15s;
+      border-left: 2px solid transparent;
+    }
+    nav a:hover { color: var(--text); background: var(--accent-dim); }
+    nav a.active { color: var(--text); border-left-color: var(--accent); background: var(--accent-dim); }
+    .nav-badge {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+    .nb-post { background: var(--green-dim); color: var(--green); }
+    .nb-get  { background: var(--blue-dim);  color: var(--blue);  }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      padding: 48px 56px;
+      max-width: 860px;
+    }
+
+    .page-title {
+      font-family: var(--sans);
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .page-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 48px; }
+
+    /* ── Section headers ── */
+    .section {
+      margin-bottom: 56px;
+      scroll-margin-top: 32px;
+    }
+    .section-title {
+      font-family: var(--sans);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── Endpoint cards ── */
+    .endpoint {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+    .endpoint-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .method-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 5px;
+      letter-spacing: 0.5px;
+    }
+    .mp-post { background: var(--green-dim); color: var(--green); }
+    .mp-get  { background: var(--blue-dim);  color: var(--blue);  }
+    .endpoint-path { font-size: 14px; font-weight: 600; color: var(--text); }
+    .auth-badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .auth-required { background: var(--yellow-dim); color: var(--yellow); }
+    .auth-open     { background: var(--green-dim);  color: var(--green);  }
+
+    .endpoint-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+    .desc { color: var(--muted); font-size: 12px; font-style: italic; }
+
+    /* ── Block labels ── */
+    .block-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    /* ── Code blocks ── */
+    pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .key   { color: #c792ea; }
+    .str   { color: var(--green); }
+    .enum  { color: var(--yellow); }
+    .note  { color: var(--muted); font-style: italic; }
+
+    /* ── Info boxes ── */
+    .info-box {
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 12px;
+      border: 1px solid;
+    }
+    .info-yellow { background: var(--yellow-dim); border-color: rgba(255,189,46,0.2); color: var(--yellow); }
+    .info-green  { background: var(--green-dim);  border-color: rgba(61,220,132,0.2); color: var(--green); }
+    .info-red    { background: var(--red-dim);    border-color: rgba(255,95,87,0.2);  color: var(--red); }
+    .info-blue   { background: var(--blue-dim);   border-color: rgba(91,163,245,0.2); color: var(--blue); }
+
+    /* ── Errors row ── */
+    .errors { display: flex; gap: 8px; flex-wrap: wrap; }
+    .err-pill {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid rgba(255,95,87,0.2);
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<nav>
+  <span class="nav-logo">AIVA<span>.api</span></span>
+
+  <div class="nav-section">Auth</div>
+  <a href="#register"><span class="nav-badge nb-post">POST</span> Register</a>
+  <a href="#login"><span class="nav-badge nb-post">POST</span> Login</a>
+  <a href="#me"><span class="nav-badge nb-get">GET</span> Get Me</a>
+  <a href="#my-patients"><span class="nav-badge nb-get">GET</span> My Patients</a>
+  <a href="#link"><span class="nav-badge nb-post">POST</span> Link Patient</a>
+
+  <div class="nav-section">Logs</div>
+  <a href="#add-log"><span class="nav-badge nb-post">POST</span> Add Log</a>
+  <a href="#get-logs"><span class="nav-badge nb-get">GET</span> Get Logs</a>
+
+  <div class="nav-section">Medications</div>
+  <a href="#add-med"><span class="nav-badge nb-post">POST</span> Add Medication</a>
+  <a href="#get-meds"><span class="nav-badge nb-get">GET</span> Get Medications</a>
+
+  <div class="nav-section">Reports</div>
+  <a href="#upload-report"><span class="nav-badge nb-post">POST</span> Upload Report</a>
+  <a href="#get-reports"><span class="nav-badge nb-get">GET</span> Get Reports</a>
+
+  <div class="nav-section">Activities</div>
+  <a href="#add-activity"><span class="nav-badge nb-post">POST</span> Add Activity</a>
+  <a href="#get-activities"><span class="nav-badge nb-get">GET</span> Get Activities</a>
+
+  <div class="nav-section">System</div>
+  <a href="#health"><span class="nav-badge nb-get">GET</span> Health Check</a>
+</nav>
+
+<!-- ── Main ── -->
+<main>
+  <div class="page-title">AIVA Backend API</div>
+  <div class="page-subtitle">Base URL: <code>https://your-render-url.onrender.com</code> </div>
+  <!-- ═══════════════ AUTH ═══════════════ -->
+  <div class="section" id="auth">
+    <div class="section-title">🔐 Authentication</div>
+
+    <div class="endpoint" id="register">
+      <div class="endpoint-header">
+        <span class="method-pill mp-post">POST</span>
+        <span class="endpoint-path">/api/users/register</span>
+        <span class="auth-badge auth-open">Public</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Register a new patient or caregiver account.</div>
+        <div>
+          <div class="block-label">Request Body</div>
+          <pre><span class="key">"name"</span>:     <span class="str">"string"</span>
+<span class="key">"email"</span>:    <span class="str">"string (unique)"</span>
+<span class="key">"password"</span>: <span class="str">"string"</span>
+<span class="key">"role"</span>:     <span class="enum">"patient" | "caregiver"</span></pre>
+        </div>
+        <div>
+          <div class="block-label">Response · 201</div>
+          <pre><span class="key">"_id"</span>:   <span class="str">"string"</span>
+<span class="key">"name"</span>:  <span class="str">"string"</span>
+<span class="key">"email"</span>: <span class="str">"string"</span>
+<span class="key">"role"</span>:  <span class="str">"string"</span>
+<span class="key">"token"</span>: <span class="str">"JWT — store this, used in all protected routes"</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">400 — User already exists</span>
+          <span class="err-pill">500 — Server error</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="login">
+      <div class="endpoint-header">
+        <span class="method-pill mp-post">POST</span>
+        <span class="endpoint-path">/api/users/login</span>
+        <span class="auth-badge auth-open">Public</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Login and receive a JWT token.</div>
+        <div>
+          <div class="block-label">Request Body</div>
+          <pre><span class="key">"email"</span>:    <span class="str">"string"</span>
+<span class="key">"password"</span>: <span class="str">"string"</span></pre>
+        </div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre><span class="key">"_id"</span>:   <span class="str">"string"</span>
+<span class="key">"name"</span>:  <span class="str">"string"</span>
+<span class="key">"email"</span>: <span class="str">"string"</span>
+<span class="key">"role"</span>:  <span class="str">"string"</span>
+<span class="key">"token"</span>: <span class="str">"JWT"</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">401 — Invalid credentials</span>
+          <span class="err-pill">500 — Server error</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="me">
+      <div class="endpoint-header">
+        <span class="method-pill mp-get">GET</span>
+        <span class="endpoint-path">/api/users/me</span>
+        <span class="auth-badge auth-required">Protected</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Returns the profile of the currently logged-in user.</div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre><span class="key">"_id"</span>:               <span class="str">"string"</span>
+<span class="key">"name"</span>:              <span class="str">"string"</span>
+<span class="key">"email"</span>:             <span class="str">"string"</span>
+<span class="key">"role"</span>:              <span class="str">"string"</span>
+<span class="key">"linkedCaregiverId"</span>: <span class="str">"ObjectId | null"</span>  <span class="note">// patients only</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">401 — Unauthorized</span>
+          <span class="err-pill">404 — User not found</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="my-patients">
+      <div class="endpoint-header">
+        <span class="method-pill mp-get">GET</span>
+        <span class="endpoint-path">/api/users/my-patients</span>
+        <span class="auth-badge auth-required">Protected · Caregiver only</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Returns all patients linked to the logged-in caregiver. Use the returned <code>_id</code> values as <code>patientId</code> / <code>userId</code> in subsequent requests.</div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre>[
+  {
+    <span class="key">"_id"</span>:               <span class="str">"string"</span>  <span class="note">// use this as patientId</span>
+    <span class="key">"name"</span>:              <span class="str">"string"</span>
+    <span class="key">"email"</span>:             <span class="str">"string"</span>
+    <span class="key">"role"</span>:              <span class="str">"patient"</span>
+    <span class="key">"linkedCaregiverId"</span>: <span class="str">"ObjectId"</span>
+  }
+]</pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">403 — Only caregivers can access this</span>
+          <span class="err-pill">401 — Unauthorized</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="link">
+      <div class="endpoint-header">
+        <span class="method-pill mp-post">POST</span>
+        <span class="endpoint-path">/api/users/link</span>
+        <span class="auth-badge auth-required">Protected · Caregiver only</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Links a patient to the logged-in caregiver. The caregiver's ID is read from the token — do not pass it in the body.</div>
+        <div>
+          <div class="block-label">Request Body</div>
+          <pre><span class="key">"patientId"</span>: <span class="str">"MongoDB ObjectId of the patient"</span></pre>
+        </div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre><span class="key">"message"</span>: <span class="str">"Patient linked successfully"</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">400 — Invalid patient</span>
+          <span class="err-pill">401 — Unauthorized</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ LOGS ═══════════════ -->
+  <div class="section" id="logs">
+    <div class="section-title">📊 Activity Logs</div>
+
+    <div class="info-box info-blue" style="margin-bottom:16px">
+      Logs are always created for the currently authenticated user — <code>userId</code> is taken from the JWT token, not the request body. Caregivers can read logs for their linked patients via <code>GET /api/logs/:userId</code>.
+    </div>
+
+    <div class="endpoint" id="add-log">
+      <div class="endpoint-header">
+        <span class="method-pill mp-post">POST</span>
+        <span class="endpoint-path">/api/logs</span>
+        <span class="auth-badge auth-required">Protected</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Create a new activity log entry for the authenticated user.</div>
+        <div>
+          <div class="block-label">Request Body</div>
+          <pre><span class="key">"activity"</span>: <span class="str">"string"</span>           <span class="note">// required — e.g. "ate_food", "missed_lunch", "idle"</span>
+<span class="key">"source"</span>:   <span class="enum">"app" | "sensor" | "caregiver" | "system"</span>   <span class="note">// default: "app"</span>
+<span class="key">"type"</span>:     <span class="enum">"activity" | "medication" | "reminder" | "sensor" | "behaviour"</span>  <span class="note">// default: "activity"</span>
+<span class="key">"metadata"</span>: <span class="str">{}</span>               <span class="note">// optional — any extra context (e.g. sensor readings, step times)</span></pre>
+        </div>
+        <div>
+          <div class="block-label">Response · 201</div>
+          <pre><span class="key">"_id"</span>:       <span class="str">"string"</span>
+<span class="key">"userId"</span>:    <span class="str">"string"</span>
+<span class="key">"activity"</span>:  <span class="str">"string"</span>
+<span class="key">"source"</span>:    <span class="str">"string"</span>
+<span class="key">"type"</span>:      <span class="str">"string"</span>
+<span class="key">"metadata"</span>:  <span class="str">{}</span>
+<span class="key">"createdAt"</span>: <span class="str">"date"</span>
+<span class="key">"updatedAt"</span>: <span class="str">"date"</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">400 — Invalid source or type</span>
+          <span class="err-pill">401 — Unauthorized</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="get-logs">
+      <div class="endpoint-header">
+        <span class="method-pill mp-get">GET</span>
+        <span class="endpoint-path">/api/logs/:userId</span>
+        <span class="auth-badge auth-required">Protected</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Fetch logs for a patient. Patients can only fetch their own. Caregivers can only fetch their linked patient's logs.</div>
+        <div>
+          <div class="block-label">Query Params (all optional)</div>
+          <pre><span class="key">type</span>    — filter by type:   <span class="enum">activity | medication | reminder | sensor | behaviour</span>
+<span class="key">source</span>  — filter by source: <span class="enum">app | sensor | caregiver | system</span>
+<span class="key">from</span>    — start date: <span class="str">"2026-01-01"</span>
+<span class="key">to</span>      — end date:   <span class="str">"2026-03-27"</span></pre>
+        </div>
+        <div>
+          <div class="block-label">Example</div>
+          <pre>GET /api/logs/64abc123?type=medication&from=2026-01-01</pre>
+        </div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre>[
+  {
+    <span class="key">"_id"</span>:       <span class="str">"string"</span>
+    <span class="key">"userId"</span>:    <span class="str">"string"</span>
+    <span class="key">"activity"</span>:  <span class="str">"string"</span>
+    <span class="key">"source"</span>:    <span class="str">"string"</span>
+    <span class="key">"type"</span>:      <span class="str">"string"</span>
+    <span class="key">"metadata"</span>:  <span class="str">{}</span>
+    <span class="key">"createdAt"</span>: <span class="str">"date"</span>
+  }
+]  <span class="note">// sorted newest first</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">403 — Access denied</span>
+          <span class="err-pill">401 — Unauthorized</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ MEDICATIONS ═══════════════ -->
+  <div class="section" id="medications">
+    <div class="section-title">💊 Medications</div>
+
+    <div class="endpoint" id="add-med">
+      <div class="endpoint-header">
+        <span class="method-pill mp-post">POST</span>
+        <span class="endpoint-path">/api/medications</span>
+        <span class="auth-badge auth-required">Protected · Caregiver only</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Add a medication schedule for a patient.</div>
+        <div>
+          <div class="block-label">Request Body</div>
+          <pre><span class="key">"patientId"</span>:    <span class="str">"MongoDB ObjectId"</span>
+<span class="key">"medicineName"</span>: <span class="str">"string"</span>   <span class="note">// e.g. "Donepezil"</span>
+<span class="key">"dosage"</span>:        <span class="str">"string"</span>   <span class="note">// e.g. "5mg"</span>
+<span class="key">"timing"</span>:        <span class="str">"string"</span>   <span class="note">// e.g. "8:00 AM"</span></pre>
+        </div>
+        <div>
+          <div class="block-label">Response · 201</div>
+          <pre><span class="key">"_id"</span>:          <span class="str">"string"</span>
+<span class="key">"userId"</span>:       <span class="str">"string"</span>
+<span class="key">"medicineName"</span>: <span class="str">"string"</span>
+<span class="key">"dosage"</span>:        <span class="str">"string"</span>
+<span class="key">"timing"</span>:        <span class="str">"string"</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">401 — Unauthorized</span>
+          <span class="err-pill">403 — Access denied</span>
+          <span class="err-pill">500 — Server error</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="get-meds">
+      <div class="endpoint-header">
+        <span class="method-pill mp-get">GET</span>
+        <span class="endpoint-path">/api/medications/:userId</span>
+        <span class="auth-badge auth-required">Protected</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Fetch all medications for a patient.</div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre>[
+  {
+    <span class="key">"_id"</span>:          <span class="str">"string"</span>
+    <span class="key">"medicineName"</span>: <span class="str">"string"</span>
+    <span class="key">"dosage"</span>:        <span class="str">"string"</span>
+    <span class="key">"timing"</span>:        <span class="str">"string"</span>
+  }
+]</pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">401 — Unauthorized</span>
+          <span class="err-pill">403 — Access denied</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ REPORTS ═══════════════ -->
+  <div class="section" id="reports">
+    <div class="section-title">📄 Medical Reports</div>
+
+    <div class="info-box info-yellow" style="margin-bottom:16px">
+      File upload is not yet implemented. <code>fileUrl</code> is a placeholder and <code>summary</code> will be populated by the ML service once integrated.
+    </div>
+
+    <div class="endpoint" id="upload-report">
+      <div class="endpoint-header">
+        <span class="method-pill mp-post">POST</span>
+        <span class="endpoint-path">/api/reports</span>
+        <span class="auth-badge auth-required">Protected · Caregiver only</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Create a report record for a patient. ML service will update the summary field once file processing is implemented.</div>
+        <div>
+          <div class="block-label">Request Body</div>
+          <pre><span class="key">"patientId"</span>: <span class="str">"MongoDB ObjectId"</span></pre>
+        </div>
+        <div>
+          <div class="block-label">Response · 201</div>
+          <pre><span class="key">"_id"</span>:     <span class="str">"string"</span>
+<span class="key">"userId"</span>:  <span class="str">"string"</span>
+<span class="key">"fileUrl"</span>: <span class="str">"dummy.pdf"</span>        <span class="note">// placeholder until file storage is set up</span>
+<span class="key">"summary"</span>: <span class="str">"Pending"</span>          <span class="note">// ML will update this</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">401 — Unauthorized</span>
+          <span class="err-pill">403 — Access denied</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="get-reports">
+      <div class="endpoint-header">
+        <span class="method-pill mp-get">GET</span>
+        <span class="endpoint-path">/api/reports/:userId</span>
+        <span class="auth-badge auth-required">Protected</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Fetch all reports for a patient.</div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre>[
+  {
+    <span class="key">"_id"</span>:     <span class="str">"string"</span>
+    <span class="key">"fileUrl"</span>: <span class="str">"string"</span>
+    <span class="key">"summary"</span>: <span class="str">"string"</span>
+  }
+]</pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">401 — Unauthorized</span>
+          <span class="err-pill">403 — Access denied</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ACTIVITIES ═══════════════ -->
+  <div class="section" id="activities">
+    <div class="section-title">🧩 Activities</div>
+
+    <div class="endpoint" id="add-activity">
+      <div class="endpoint-header">
+        <span class="method-pill mp-post">POST</span>
+        <span class="endpoint-path">/api/activities</span>
+        <span class="auth-badge auth-required">Protected</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Create a guided activity (ADL) with step-by-step instructions for a patient.</div>
+        <div>
+          <div class="block-label">Request Body</div>
+          <pre><span class="key">"patientId"</span>: <span class="str">"MongoDB ObjectId"</span>
+<span class="key">"name"</span>:      <span class="str">"string"</span>            <span class="note">// e.g. "Make Tea"</span>
+<span class="key">"steps"</span>: [
+  {
+    <span class="key">"stepNumber"</span>:  <span class="str">1</span>
+    <span class="key">"instruction"</span>: <span class="str">"Boil water"</span>
+  },
+  {
+    <span class="key">"stepNumber"</span>:  <span class="str">2</span>
+    <span class="key">"instruction"</span>: <span class="str">"Add tea powder"</span>
+  }
+]</pre>
+        </div>
+        <div>
+          <div class="block-label">Response · 201</div>
+          <pre><span class="key">"_id"</span>:    <span class="str">"string"</span>
+<span class="key">"userId"</span>: <span class="str">"string"</span>
+<span class="key">"name"</span>:   <span class="str">"string"</span>
+<span class="key">"steps"</span>:  <span class="str">[...]</span></pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">401 — Unauthorized</span>
+          <span class="err-pill">403 — Access denied</span>
+          <span class="err-pill">500 — Server error</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="endpoint" id="get-activities">
+      <div class="endpoint-header">
+        <span class="method-pill mp-get">GET</span>
+        <span class="endpoint-path">/api/activities/:userId</span>
+        <span class="auth-badge auth-required">Protected</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Fetch all activities for a patient.</div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre>[
+  {
+    <span class="key">"_id"</span>:    <span class="str">"string"</span>
+    <span class="key">"name"</span>:   <span class="str">"string"</span>
+    <span class="key">"steps"</span>:  <span class="str">[{ "stepNumber": 1, "instruction": "string" }]</span>
+  }
+]</pre>
+        </div>
+        <div class="errors">
+          <span class="err-pill">401 — Unauthorized</span>
+          <span class="err-pill">403 — Access denied</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ HEALTH ═══════════════ -->
+  <div class="section" id="health-section">
+    <div class="section-title">⚡ System</div>
+
+    <div class="endpoint" id="health">
+      <div class="endpoint-header">
+        <span class="method-pill mp-get">GET</span>
+        <span class="endpoint-path">/health</span>
+        <span class="auth-badge auth-open">Public</span>
+      </div>
+      <div class="endpoint-body">
+        <div class="desc">Use this to verify the server is live before making other requests.</div>
+        <div>
+          <div class="block-label">Response · 200</div>
+          <pre><span class="key">"status"</span>: <span class="str">"ok"</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll(".endpoint");
+  const navLinks = document.querySelectorAll("nav a");
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove("active"));
+        const match = document.querySelector(`nav a[href="#${e.target.id}"]`);
+        if (match) match.classList.add("active");
+      }
+    });
+  }, { threshold: 0.6 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
