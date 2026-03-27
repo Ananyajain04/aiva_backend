@@ -108,3 +108,21 @@ exports.linkPatient = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.getAllPatients = async (req, res) => {
+  try {
+    const patients = await User.find({ role: "patient" })
+      .select("-password"); // remove sensitive data
+
+    res.json({
+      count: patients.length,
+      patients,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching patients",
+      error: error.message,
+    });
+  }
+};
