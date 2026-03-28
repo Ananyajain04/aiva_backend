@@ -7,7 +7,7 @@ const {
   getReports,
 } = require("../controllers/reportController");
 
-router.post("/", protect,allowPatientAccess,uploadReport);
+router.post("/", protect,uploadReport);
 router.get("/:userId", protect,allowPatientAccess, getReports);
 
 module.exports = router;

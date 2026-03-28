@@ -39,7 +39,6 @@
       min-height: 100vh;
     }
 
-    /* ── Sidebar ── */
     nav {
       width: 240px;
       background: var(--surface);
@@ -86,7 +85,6 @@
     .nb-post { background: var(--green-dim); color: var(--green); }
     .nb-get  { background: var(--blue-dim);  color: var(--blue);  }
 
-    /* ── Main ── */
     main {
       flex: 1;
       padding: 48px 56px;
@@ -102,7 +100,6 @@
     }
     .page-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 48px; }
 
-    /* ── Section headers ── */
     .section {
       margin-bottom: 56px;
       scroll-margin-top: 32px;
@@ -120,7 +117,6 @@
       gap: 10px;
     }
 
-    /* ── Endpoint cards ── */
     .endpoint {
       background: var(--card);
       border: 1px solid var(--border);
@@ -159,7 +155,6 @@
 
     .desc { color: var(--muted); font-size: 12px; font-style: italic; }
 
-    /* ── Block labels ── */
     .block-label {
       font-size: 10px;
       text-transform: uppercase;
@@ -168,7 +163,6 @@
       margin-bottom: 6px;
     }
 
-    /* ── Code blocks ── */
     pre {
       background: var(--bg);
       border: 1px solid var(--border);
@@ -185,7 +179,6 @@
     .enum  { color: var(--yellow); }
     .note  { color: var(--muted); font-style: italic; }
 
-    /* ── Info boxes ── */
     .info-box {
       border-radius: 6px;
       padding: 12px 16px;
@@ -197,7 +190,6 @@
     .info-red    { background: var(--red-dim);    border-color: rgba(255,95,87,0.2);  color: var(--red); }
     .info-blue   { background: var(--blue-dim);   border-color: rgba(91,163,245,0.2); color: var(--blue); }
 
-    /* ── Errors row ── */
     .errors { display: flex; gap: 8px; flex-wrap: wrap; }
     .err-pill {
       font-size: 11px;
@@ -214,7 +206,6 @@
 </head>
 <body>
 
-<!-- ── Sidebar ── -->
 <nav>
   <span class="nav-logo">AIVA<span>.api</span></span>
 
@@ -245,11 +236,11 @@
   <a href="#health"><span class="nav-badge nb-get">GET</span> Health Check</a>
 </nav>
 
-<!-- ── Main ── -->
 <main>
   <div class="page-title">AIVA Backend API</div>
-  <div class="page-subtitle">Base URL: <code>https://your-render-url.onrender.com</code> </div>
-  <!-- ═══════════════ AUTH ═══════════════ -->
+  <div class="page-subtitle">Base URL: <code>https://your-render-url.onrender.com</code></div>
+
+  <!-- AUTH -->
   <div class="section" id="auth">
     <div class="section-title">🔐 Authentication</div>
 
@@ -385,33 +376,36 @@
     </div>
   </div>
 
-  <!-- ═══════════════ LOGS ═══════════════ -->
+  <!-- LOGS -->
   <div class="section" id="logs">
     <div class="section-title">📊 Activity Logs</div>
 
+    <!-- ✅ UPDATED info box -->
     <div class="info-box info-blue" style="margin-bottom:16px">
-      Logs are always created for the currently authenticated user — <code>userId</code> is taken from the JWT token, not the request body. Caregivers can read logs for their linked patients via <code>GET /api/logs/:userId</code>.
+      Logs are created by caregivers on behalf of a patient. Pass <code>patientId</code> in the request body — the caregiver must be linked to that patient. Caregivers and patients can read logs via <code>GET /api/logs/:userId</code>.
     </div>
 
     <div class="endpoint" id="add-log">
       <div class="endpoint-header">
         <span class="method-pill mp-post">POST</span>
         <span class="endpoint-path">/api/logs</span>
-        <span class="auth-badge auth-required">Protected</span>
+        <span class="auth-badge auth-required">Protected · Caregiver only</span>
       </div>
       <div class="endpoint-body">
-        <div class="desc">Create a new activity log entry for the authenticated user.</div>
+        <div class="desc">Create a new activity log entry for a linked patient.</div>
         <div>
           <div class="block-label">Request Body</div>
-          <pre><span class="key">"activity"</span>: <span class="str">"string"</span>           <span class="note">// required — e.g. "ate_food", "missed_lunch", "idle"</span>
-<span class="key">"source"</span>:   <span class="enum">"app" | "sensor" | "caregiver" | "system"</span>   <span class="note">// default: "app"</span>
-<span class="key">"type"</span>:     <span class="enum">"activity" | "medication" | "reminder" | "sensor" | "behaviour"</span>  <span class="note">// default: "activity"</span>
-<span class="key">"metadata"</span>: <span class="str">{}</span>               <span class="note">// optional — any extra context (e.g. sensor readings, step times)</span></pre>
+          <!-- ✅ UPDATED: added patientId field -->
+          <pre><span class="key">"patientId"</span>: <span class="str">"MongoDB ObjectId"</span>        <span class="note">// required — must be your linked patient</span>
+<span class="key">"activity"</span>:  <span class="str">"string"</span>                  <span class="note">// required — e.g. "ate_food", "missed_lunch"</span>
+<span class="key">"source"</span>:    <span class="enum">"app" | "sensor" | "caregiver" | "system"</span>   <span class="note">// default: "app"</span>
+<span class="key">"type"</span>:      <span class="enum">"activity" | "medication" | "reminder" | "sensor" | "behaviour"</span>  <span class="note">// default: "activity"</span>
+<span class="key">"metadata"</span>:  <span class="str">{}</span>                        <span class="note">// optional — any extra context</span></pre>
         </div>
         <div>
           <div class="block-label">Response · 201</div>
           <pre><span class="key">"_id"</span>:       <span class="str">"string"</span>
-<span class="key">"userId"</span>:    <span class="str">"string"</span>
+<span class="key">"userId"</span>:    <span class="str">"string"</span>  <span class="note">// the patient's ID</span>
 <span class="key">"activity"</span>:  <span class="str">"string"</span>
 <span class="key">"source"</span>:    <span class="str">"string"</span>
 <span class="key">"type"</span>:      <span class="str">"string"</span>
@@ -422,6 +416,8 @@
         <div class="errors">
           <span class="err-pill">400 — Invalid source or type</span>
           <span class="err-pill">401 — Unauthorized</span>
+          <span class="err-pill">403 — Not your patient</span>
+          <span class="err-pill">404 — Patient not found</span>
         </div>
       </div>
     </div>
@@ -467,7 +463,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════ MEDICATIONS ═══════════════ -->
+  <!-- MEDICATIONS -->
   <div class="section" id="medications">
     <div class="section-title">💊 Medications</div>
 
@@ -478,25 +474,27 @@
         <span class="auth-badge auth-required">Protected · Caregiver only</span>
       </div>
       <div class="endpoint-body">
-        <div class="desc">Add a medication schedule for a patient.</div>
+        <div class="desc">Add a medication schedule for a linked patient.</div>
         <div>
           <div class="block-label">Request Body</div>
-          <pre><span class="key">"patientId"</span>:    <span class="str">"MongoDB ObjectId"</span>
-<span class="key">"medicineName"</span>: <span class="str">"string"</span>   <span class="note">// e.g. "Donepezil"</span>
-<span class="key">"dosage"</span>:        <span class="str">"string"</span>   <span class="note">// e.g. "5mg"</span>
-<span class="key">"timing"</span>:        <span class="str">"string"</span>   <span class="note">// e.g. "8:00 AM"</span></pre>
+          <pre><span class="key">"patientId"</span>:    <span class="str">"MongoDB ObjectId"</span>  <span class="note">// must be your linked patient</span>
+<span class="key">"medicineName"</span>: <span class="str">"string"</span>            <span class="note">// e.g. "Donepezil"</span>
+<span class="key">"dosage"</span>:        <span class="str">"string"</span>            <span class="note">// e.g. "5mg"</span>
+<span class="key">"timing"</span>:        <span class="str">"string"</span>            <span class="note">// e.g. "8:00 AM"</span></pre>
         </div>
         <div>
           <div class="block-label">Response · 201</div>
           <pre><span class="key">"_id"</span>:          <span class="str">"string"</span>
-<span class="key">"userId"</span>:       <span class="str">"string"</span>
+<span class="key">"userId"</span>:       <span class="str">"string"</span>  <span class="note">// the patient's ID</span>
 <span class="key">"medicineName"</span>: <span class="str">"string"</span>
 <span class="key">"dosage"</span>:        <span class="str">"string"</span>
 <span class="key">"timing"</span>:        <span class="str">"string"</span></pre>
         </div>
         <div class="errors">
+          <span class="err-pill">400 — Missing required fields</span>
           <span class="err-pill">401 — Unauthorized</span>
-          <span class="err-pill">403 — Access denied</span>
+          <span class="err-pill">403 — Not your patient</span>
+          <span class="err-pill">404 — Patient not found</span>
           <span class="err-pill">500 — Server error</span>
         </div>
       </div>
@@ -529,7 +527,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════ REPORTS ═══════════════ -->
+  <!-- REPORTS -->
   <div class="section" id="reports">
     <div class="section-title">📄 Medical Reports</div>
 
@@ -544,21 +542,22 @@
         <span class="auth-badge auth-required">Protected · Caregiver only</span>
       </div>
       <div class="endpoint-body">
-        <div class="desc">Create a report record for a patient. ML service will update the summary field once file processing is implemented.</div>
+        <div class="desc">Create a report record for a linked patient. ML service will update the summary field once file processing is implemented.</div>
         <div>
           <div class="block-label">Request Body</div>
-          <pre><span class="key">"patientId"</span>: <span class="str">"MongoDB ObjectId"</span></pre>
+          <pre><span class="key">"patientId"</span>: <span class="str">"MongoDB ObjectId"</span>  <span class="note">// must be your linked patient</span></pre>
         </div>
         <div>
           <div class="block-label">Response · 201</div>
           <pre><span class="key">"_id"</span>:     <span class="str">"string"</span>
-<span class="key">"userId"</span>:  <span class="str">"string"</span>
-<span class="key">"fileUrl"</span>: <span class="str">"dummy.pdf"</span>        <span class="note">// placeholder until file storage is set up</span>
-<span class="key">"summary"</span>: <span class="str">"Pending"</span>          <span class="note">// ML will update this</span></pre>
+<span class="key">"userId"</span>:  <span class="str">"string"</span>  <span class="note">// the patient's ID</span>
+<span class="key">"fileUrl"</span>: <span class="str">"dummy.pdf"</span>   <span class="note">// placeholder until file storage is set up</span>
+<span class="key">"summary"</span>: <span class="str">"Pending"</span>     <span class="note">// ML will update this</span></pre>
         </div>
         <div class="errors">
           <span class="err-pill">401 — Unauthorized</span>
-          <span class="err-pill">403 — Access denied</span>
+          <span class="err-pill">403 — Not your patient</span>
+          <span class="err-pill">404 — Patient not found</span>
         </div>
       </div>
     </div>
@@ -589,7 +588,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════ ACTIVITIES ═══════════════ -->
+  <!-- ACTIVITIES -->
   <div class="section" id="activities">
     <div class="section-title">🧩 Activities</div>
 
@@ -597,13 +596,13 @@
       <div class="endpoint-header">
         <span class="method-pill mp-post">POST</span>
         <span class="endpoint-path">/api/activities</span>
-        <span class="auth-badge auth-required">Protected</span>
+        <span class="auth-badge auth-required">Protected · Caregiver only</span>
       </div>
       <div class="endpoint-body">
-        <div class="desc">Create a guided activity (ADL) with step-by-step instructions for a patient.</div>
+        <div class="desc">Create a guided activity (ADL) with step-by-step instructions for a linked patient.</div>
         <div>
           <div class="block-label">Request Body</div>
-          <pre><span class="key">"patientId"</span>: <span class="str">"MongoDB ObjectId"</span>
+          <pre><span class="key">"patientId"</span>: <span class="str">"MongoDB ObjectId"</span>  <span class="note">// must be your linked patient</span>
 <span class="key">"name"</span>:      <span class="str">"string"</span>            <span class="note">// e.g. "Make Tea"</span>
 <span class="key">"steps"</span>: [
   {
@@ -619,13 +618,14 @@
         <div>
           <div class="block-label">Response · 201</div>
           <pre><span class="key">"_id"</span>:    <span class="str">"string"</span>
-<span class="key">"userId"</span>: <span class="str">"string"</span>
+<span class="key">"userId"</span>: <span class="str">"string"</span>  <span class="note">// the patient's ID</span>
 <span class="key">"name"</span>:   <span class="str">"string"</span>
 <span class="key">"steps"</span>:  <span class="str">[...]</span></pre>
         </div>
         <div class="errors">
           <span class="err-pill">401 — Unauthorized</span>
-          <span class="err-pill">403 — Access denied</span>
+          <span class="err-pill">403 — Not your patient</span>
+          <span class="err-pill">404 — Patient not found</span>
           <span class="err-pill">500 — Server error</span>
         </div>
       </div>
@@ -657,7 +657,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════ HEALTH ═══════════════ -->
+  <!-- HEALTH -->
   <div class="section" id="health-section">
     <div class="section-title">⚡ System</div>
 
@@ -680,7 +680,6 @@
 </main>
 
 <script>
-  // Highlight active nav link on scroll
   const sections = document.querySelectorAll(".endpoint");
   const navLinks = document.querySelectorAll("nav a");
 

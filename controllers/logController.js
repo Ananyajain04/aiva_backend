@@ -1,12 +1,12 @@
 const Log = require("../models/Log");
-
+const User = require("../models/User");
 const VALID_SOURCES = ["app", "sensor", "caregiver", "system"];
 const VALID_TYPES = ["activity", "medication", "reminder", "sensor", "behaviour"];
 
 // Add log (always from logged-in user)
 exports.addLog = async (req, res) => {
   try {
-    const { activity, source, type, metadata } = req.body;
+    const { patientId,activity, source, type, metadata } = req.body;
 
     if (source && !VALID_SOURCES.includes(source)) {
       return res.status(400).json({ error: `Invalid source. Must be one of: ${VALID_SOURCES.join(", ")}` });
@@ -15,9 +15,17 @@ exports.addLog = async (req, res) => {
     if (type && !VALID_TYPES.includes(type)) {
       return res.status(400).json({ error: `Invalid type. Must be one of: ${VALID_TYPES.join(", ")}` });
     }
+    //Verify caregiver is linked to this patient
+    const patient = await User.findById(patientId);
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+    if (patient.linkedCaregiverId?.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not your patient" });
+    }
 
     const log = await Log.create({
-      userId: req.user.id,
+      userId: patientId,
       activity,
       source: source || "app",
       type: type || "activity",

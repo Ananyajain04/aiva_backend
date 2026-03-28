@@ -9,7 +9,7 @@ const {
 const protect = require("../middleware/authMiddleware");
 const allowPatientAccess = require("../middleware/accessMiddleware");
 
-router.post("/", protect, allowPatientAccess, addActivity);
+router.post("/", protect,addActivity);
 router.get("/:userId", protect, allowPatientAccess, getActivities);
 
 module.exports = router;

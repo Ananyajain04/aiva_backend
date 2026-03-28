@@ -8,7 +8,7 @@ const {
 } = require("../controllers/medicationController");
 
 
-router.post("/",protect,allowPatientAccess, addMedication);
+router.post("/",protect,addMedication);
 router.get("/:userId", protect,allowPatientAccess, getMedications);
 
 module.exports = router;
